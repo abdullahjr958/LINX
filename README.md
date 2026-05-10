@@ -17,34 +17,95 @@
 ![Platform](https://img.shields.io/badge/platform-Linux-informational?style=flat-square)
 ![Build](https://img.shields.io/badge/build-Make-success?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
-![University](https://img.shields.io/badge/Bahria%20University%20Karachi-OS%202025-orange?style=flat-square)
 
 </div>
 
 ---
 
-## Overview
+# LINX — Linux Process & Resource Manager
 
-LINX is a modular, interactive simulation tool that replicates the core responsibilities of an OS kernel — entirely within Linux userspace. No kernel modules, no root access, no VM required.
-
-It models three fundamental OS subsystems:
-
-- **CPU Scheduling** — FCFS, SJF, and Round Robin with live Gantt chart output
-- **Memory Management** — Paging with FIFO and LRU page replacement
-- **Process Synchronisation** — Producer-Consumer on a bounded buffer using POSIX semaphores
-
-Built for the **Operating Systems course at Bahria University Karachi (4th Semester, 2025)** using real OS primitives: `pthreads`, POSIX semaphores, and Linux system calls.
+A userspace OS simulation tool written in C (C11) that models **CPU scheduling**, **memory paging**, and **thread synchronization**. Built with POSIX pthreads/semaphores and GNU Make.
 
 ---
 
 ## Features
 
-| Module | What it simulates |
-|---|---|
-| **Process Manager** | POSIX thread lifecycle, mutex-protected concurrent execution |
-| **CPU Scheduler** | FCFS, SJF, Round Robin — Gantt chart + wait/turnaround stats |
-| **Memory Manager** | Per-process page tables, page fault tracking, FIFO/LRU replacement |
-| **Sync Demo** | Semaphore-based Producer-Consumer with live buffer state logging |
+- **CPU Scheduling** — FCFS, SJF, and Round Robin with Gantt chart visualization
+- **Memory Paging** — Demand paging simulation with FIFO and LRU page replacement
+- **Producer-Consumer** — Bounded buffer synchronization using POSIX semaphores and mutexes
+- **Interactive Menu** — Run individual modules or all three in sequence
+- **Terminal Visualizations** — ASCII Gantt charts, metrics tables, and buffer state display
+
+---
+
+## Requirements
+
+- GCC with C11 support (`gcc >= 7`)
+- GNU Make
+- Linux or any POSIX-compliant OS
+- pthreads library (`-lpthread`)
+
+---
+
+## Build
+
+```bash
+git clone https://github.com/abdullahjr958/LINX.git
+cd LINX
+make
+```
+
+Clean build artifacts:
+
+```bash
+make clean
+```
+
+---
+
+## Usage
+
+```bash
+./linx [OPTIONS]
+```
+
+### Options
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--scheduler=<fcfs\|sjf\|rr>` | `fcfs` | CPU scheduling algorithm |
+| `--quantum=<ms>` | `4` | Time quantum for Round Robin |
+| `--frames=<n>` | `16` | Number of physical memory frames |
+| `--page-policy=<fifo\|lru>` | `fifo` | Page replacement policy |
+| `--producers=<n>` | `2` | Number of producer threads |
+| `--consumers=<n>` | `2` | Number of consumer threads |
+| `--processes=<n>` | `6` | Number of simulated processes |
+
+### Examples
+
+```bash
+# Run with defaults
+./linx
+
+# Round Robin scheduling with 3ms quantum, 8 frames, LRU
+./linx --scheduler=rr --quantum=3 --frames=8 --page-policy=lru
+
+# 3 producers, 3 consumers, 10 processes
+./linx --producers=3 --consumers=3 --processes=10
+
+# Full simulation with custom settings
+./linx --scheduler=rr --quantum=2 --frames=8 --producers=3 --consumers=3 --processes=6
+```
+
+After launching, an interactive menu lets you choose which module to run:
+
+```
+[1] CPU Scheduling
+[2] Memory Paging
+[3] Producer-Consumer
+[4] Run All
+[0] Exit
+```
 
 ---
 
@@ -52,207 +113,65 @@ Built for the **Operating Systems course at Bahria University Karachi (4th Semes
 
 ```
 LINX/
+├── Makefile
 ├── include/
-│   ├── types.h              # Shared type definitions (Process, Config, BoundedBuffer)
-│   └── linx.h               # Public module API contracts
-├── src/
-│   ├── main.c               # CLI argument parser + interactive menu
-│   ├── process_mgr.c        # Thread management module
-│   ├── scheduling/
-│   │   ├── scheduler.h      # Internal header (GanttChart, GanttEntry)
-│   │   ├── scheduler.c      # Dispatcher + Gantt/results rendering
-│   │   ├── fcfs.c           # First Come First Serve
-│   │   ├── sjf.c            # Shortest Job First
-│   │   └── rr.c             # Round Robin
-│   ├── memory/
-│   │   └── paging.c         # Paging simulator (FIFO + LRU replacement)
-│   └── sync/
-│       └── sync.c           # Producer-Consumer semaphore demo
-└── Makefile
+│   ├── common.h        # Shared types, constants, macros
+│   ├── process.h       # PCB definition
+│   ├── scheduler.h     # Scheduling interfaces
+│   ├── memory.h        # Paging system interface
+│   ├── sync.h          # Producer-Consumer interface
+│   ├── cli.h           # CLI parsing & menu
+│   └── display.h       # Gantt chart & table rendering
+└── src/
+    ├── main.c
+    ├── cli.c
+    ├── process.c
+    ├── scheduler.c
+    ├── scheduler_fcfs.c
+    ├── scheduler_sjf.c
+    ├── scheduler_rr.c
+    ├── memory.c
+    ├── sync.c
+    └── display.c
 ```
 
 ---
 
-## Getting Started
+## Modules
 
-### Prerequisites
+### CPU Scheduling
+Simulates three non-preemptive/preemptive algorithms on a configurable process workload. Outputs a Gantt chart and a per-process metrics table showing wait time, turnaround time, and completion time.
 
-- GCC with C11 support
-- GNU Make
-- Linux (tested on Ubuntu 22.04+)
-- POSIX threads (`libpthread` — included by default on all Linux distros)
+### Memory Paging
+Simulates demand paging with a configurable number of physical frames. Generates a random page reference string for each process and tracks page faults, frame allocation, and frame utilization under both FIFO and LRU replacement.
 
-### Build
-
-```bash
-git clone https://github.com/your-username/LINX.git
-cd LINX
-make
-```
-
-The binary is placed at `./linx`.
-
-```bash
-make clean     # remove binary
-make rebuild   # clean + build
-```
-
-### Run
-
-```bash
-./linx                             # interactive menu
-./linx --scheduler=rr --quantum=4 # launch with Round Robin, quantum 4 ms
-./linx --scheduler=sjf --frames=8 # SJF scheduler, 8 physical memory frames
-./linx --help                      # show all flags
-```
+### Producer-Consumer
+Spawns configurable numbers of producer and consumer threads sharing a bounded buffer of size 16. Uses POSIX semaphores (`sem_t`) for slot counting and `pthread_mutex_t` for buffer access. Producers and consumers log every operation to stdout; the simulation reports total items produced and consumed on exit.
 
 ---
 
-## CLI Flags
-
-| Flag | Short | Default | Description |
-|---|---|---|---|
-| `--scheduler=<algo>` | `-s` | `fcfs` | CPU scheduling algorithm: `fcfs`, `sjf`, or `rr` |
-| `--quantum=<ms>` | `-q` | `4` | Time quantum for Round Robin (ms) |
-| `--frames=<n>` | `-f` | `8` | Number of physical memory frames |
-| `--producers=<n>` | `-p` | `2` | Producer thread count for sync demo |
-| `--consumers=<n>` | `-c` | `2` | Consumer thread count for sync demo |
-| `--help` | `-h` | — | Print usage and exit |
-
----
-
-## Usage Walkthrough
-
-### 1. CPU Scheduling
-
-Launch LINX and select **[1] CPU Scheduling Simulator**. Enter your processes (burst time, arrival time, priority, pages):
+## Sample Output
 
 ```
-  P1     4 0 2 2
-  P2     6 2 1 3
-  P3     2 4 3 1
+Gantt Chart [RR | quantum=3]:
+┌────┬────┬────┬────┬──┬────┐
+│ P1 │ P2 │ P3 │ P1 │…│ P3 │
+└────┴────┴────┴────┴──┴────┘
+0    3    6    9   12  ...  26
+
+┌─────┬───────┬──────────┬────────────────┐
+│ PID │ Burst │ Wait (t) │ Turnaround (t) │
+├─────┼───────┼──────────┼────────────────┤
+│ P1  │   7   │    3     │      10        │
+│ P2  │   4   │    5     │       9        │
+│ P3  │   9   │    8     │      17        │
+├─────┼───────┼──────────┼────────────────┤
+│ AVG │       │   5.33   │     12.00      │
+└─────┴───────┴──────────┴────────────────┘
 ```
-
-**Sample output (FCFS):**
-
-```
-  Gantt Chart:
-  +----------------+------------------------+--------+
-  |       P1       |           P2           |   P3   |
-  +----------------+------------------------+--------+
-  0               4                        10      12
-
-  PID    Burst(ms)    Wait(ms)     Turnaround(ms)
-  ──────────────────────────────────────────────────
-  P1     4            0            4
-  P2     6            2            8
-  P3     2            6            8
-  ──────────────────────────────────────────────────
-  Avg Wait: 2.67 ms     Avg Turnaround: 6.67 ms
-```
-
-### 2. Memory Management
-
-Select **[2] Memory Management**. LINX simulates page references for each process against a configurable frame pool, tracking page faults and printing the final page table state.
-
-### 3. Synchronisation Demo
-
-Select **[3] Synchronisation Demo**. LINX spawns configurable producer and consumer threads that share a bounded buffer guarded by three POSIX semaphores, logging every produce/consume event live.
-
----
-
-## OS Concepts Demonstrated
-
-### CPU Scheduling Algorithms
-
-| Algorithm | Type | Optimal For | Trade-off |
-|---|---|---|---|
-| **FCFS** | Non-preemptive | Simplicity | Convoy effect on long jobs |
-| **SJF** | Non-preemptive | Minimum avg wait time | Requires known burst times |
-| **Round Robin** | Preemptive | Fairness / responsiveness | Higher avg turnaround |
-
-### Page Replacement Policies
-
-| Policy | Strategy | Belady's Anomaly |
-|---|---|---|
-| **FIFO** | Evict the oldest resident page | Susceptible |
-| **LRU** | Evict the least recently used page | Immune |
-
-### Semaphore Solution (Producer-Consumer)
-
-Three semaphores enforce safe concurrent buffer access:
-
-```c
-// Producer
-sem_wait(&buf->empty);   // wait for a free slot
-sem_wait(&buf->mutex);   // acquire mutual exclusion
-// ... write item ...
-sem_post(&buf->mutex);   // release lock
-sem_post(&buf->full);    // signal item available
-
-// Consumer (mirror image)
-sem_wait(&buf->full);
-sem_wait(&buf->mutex);
-// ... read item ...
-sem_post(&buf->mutex);
-sem_post(&buf->empty);
-```
-
----
-
-## Performance Snapshot
-
-Tested with 4 processes (bursts: 4, 6, 2, 8 ms — arrivals: 0, 2, 4, 6 ms):
-
-| Algorithm | Avg Wait | Avg Turnaround | Fairness |
-|---|---|---|---|
-| FCFS | 3.50 ms | 8.50 ms | Low |
-| SJF | **2.50 ms** ✓ | **7.50 ms** ✓ | Low |
-| Round Robin (Q=4) | 4.00 ms | 9.00 ms | **High** ✓ |
-
-SJF is optimal for average wait time. Round Robin provides the most equitable CPU distribution.
-
----
-
-## Technology Stack
-
-- **Language** — C (C11 standard)
-- **Compiler** — GCC with `-Wall -Wextra -pthread`
-- **Threading** — POSIX pthreads (`pthread_create`, `pthread_join`, `pthread_mutex_t`)
-- **Synchronisation** — POSIX semaphores (`sem_wait`, `sem_post`, `sem_init`)
-- **Build System** — GNU Make
-- **Platform** — Linux (userspace only)
-
----
-
-## Known Limitations
-
-- Burst times are user-supplied — no burst estimation heuristic (e.g. exponential averaging)
-- SJF is non-preemptive only — Shortest Remaining Time First (SRTF) is not implemented
-- Page replacement operates on sequential page reference strings — not a full virtual memory simulation
-- The sync demo runs a fixed number of produce/consume cycles per thread
-
----
-
-## Contributing
-
-This is a university course project. If you are using it as a reference for your own OS coursework:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/lru-replacement`
-3. Commit your changes: `git commit -m "add LRU page replacement"`
-4. Push and open a pull request
 
 ---
 
 ## License
 
-MIT License — see [`LICENSE`](LICENSE) for details.
-
----
-
-<div align="center">
-
-**Bahria University Karachi &nbsp;|&nbsp; Operating Systems 2025 &nbsp;|&nbsp; 4th Semester**
-
-</div>
+This project is released for educational purposes.

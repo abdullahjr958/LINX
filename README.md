@@ -112,22 +112,25 @@ After launching, an interactive menu lets you choose which module to run:
 ```
 LINX/
 ├── include/
-│   ├── types.h              # Shared type definitions (Process, Config, BoundedBuffer)
-│   └── linx.h               # Public module API contracts
+│   ├── linx.h
+│   └── types.h
 ├── src/
 │   ├── main.c               # CLI argument parser + interactive menu
 │   ├── process_mgr.c        # Thread management module
-│   ├── scheduling/
-│   │   ├── scheduler.h      # Internal header (GanttChart, GanttEntry)
-│   │   ├── scheduler.c      # Dispatcher + Gantt/results rendering
-│   │   ├── fcfs.c           # First Come First Serve
-│   │   ├── sjf.c            # Shortest Job First
-│   │   └── rr.c             # Round Robin
 │   ├── memory/
-│   │   └── paging.c         # Paging simulator (FIFO + LRU replacement)
+│   │   ├── frame_alloc.c
+│   │   ├── paging.c
+│   │   └── paging.h
+│   ├── scheduling/
+│   │   └── scheduler.c
 │   └── sync/
-│       └── sync.c           # Producer-Consumer semaphore demo
-└── Makefile
+│       ├── buffer.c
+│       ├── semaphore_demo.c
+│       └── sync.h
+├── Makefile
+├── README.md
+└── linx.exe
+
 ```
 
 ---

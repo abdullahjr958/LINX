@@ -1,5 +1,3 @@
-<div align="center">
-
 ```
 ██╗     ██╗███╗   ██╗██╗  ██╗
 ██║     ██║████╗  ██║╚██╗██╔╝
@@ -113,26 +111,23 @@ After launching, an interactive menu lets you choose which module to run:
 
 ```
 LINX/
-├── Makefile
 ├── include/
-│   ├── common.h        # Shared types, constants, macros
-│   ├── process.h       # PCB definition
-│   ├── scheduler.h     # Scheduling interfaces
-│   ├── memory.h        # Paging system interface
-│   ├── sync.h          # Producer-Consumer interface
-│   ├── cli.h           # CLI parsing & menu
-│   └── display.h       # Gantt chart & table rendering
-└── src/
-    ├── main.c
-    ├── cli.c
-    ├── process.c
-    ├── scheduler.c
-    ├── scheduler_fcfs.c
-    ├── scheduler_sjf.c
-    ├── scheduler_rr.c
-    ├── memory.c
-    ├── sync.c
-    └── display.c
+│   ├── types.h              # Shared type definitions (Process, Config, BoundedBuffer)
+│   └── linx.h               # Public module API contracts
+├── src/
+│   ├── main.c               # CLI argument parser + interactive menu
+│   ├── process_mgr.c        # Thread management module
+│   ├── scheduling/
+│   │   ├── scheduler.h      # Internal header (GanttChart, GanttEntry)
+│   │   ├── scheduler.c      # Dispatcher + Gantt/results rendering
+│   │   ├── fcfs.c           # First Come First Serve
+│   │   ├── sjf.c            # Shortest Job First
+│   │   └── rr.c             # Round Robin
+│   ├── memory/
+│   │   └── paging.c         # Paging simulator (FIFO + LRU replacement)
+│   └── sync/
+│       └── sync.c           # Producer-Consumer semaphore demo
+└── Makefile
 ```
 
 ---

@@ -20,12 +20,6 @@
 
 ---
 
-# LINX — Linux Process & Resource Manager
-
-A userspace OS simulation tool written in C (C11) that models **CPU scheduling**, **memory paging**, and **thread synchronization**. Built with POSIX pthreads/semaphores and GNU Make.
-
----
-
 ## Features
 
 - **CPU Scheduling** — FCFS, SJF, and Round Robin with Gantt chart visualization
